@@ -1,0 +1,3 @@
+*.swp
+files/ossec.key
+files/ossec.cer
