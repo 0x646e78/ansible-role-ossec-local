@@ -1,11 +1,14 @@
 ---
 
+### RedHat - Add Repo
 - name: Add atomic repository
   template: src=atomic.repo.j2
             dest=/etc/yum.repos.d/atomic.repo
             owner=root
             group=root
             mode=0644
+  when: ansible_os_family == 'RedHat'
+
 
 # https://www.atomicorp.com/RPM-GPG-KEY.art.txt
 - name: Add atomic GPG key
@@ -14,6 +17,31 @@
         owner=root 
         group=root 
         mode=0644
+  when: ansible_os_family == 'RedHat'
+
+### Debian - Add Repo
+- name: Install python-apt, a requirement for apt_repository
+  apt:  name=python-apt 
+        state=latest
+  when: ansible_of_family == 'Debian'
+
+- name: Add alienvault GPG key
+  apt_key: url='http://ossec.alienvault.com/repos/apt/conf/ossec-key.gpg.key' 
+           state=present
+  when: ansible_of_family == 'Debian'
+
+- name: Add alienvault apt repository
+  apt_repository: repo='deb http://ossec.alienvault.com/repos/apt/debian wheezy main' 
+                  state=present
+  when: ansible_of_family == 'Debian'
+
+### RedHat - Install ossec server
+- name: Install ossec server
+  yum: name=ossec-hids-server 
+       state=latest
+  notify:
+    - Initialize ossec
+  when: ansible_os_family == 'RedHat'
 
 - name: Install ossec authd init script
   template: src=ossec-authd.j2
@@ -21,13 +49,17 @@
             owner=root 
             group=root
             mode=0755
+  when: ansible_os_family == 'RedHat'
 
+### Debian - Install ossec server
 - name: Install ossec server
-  yum: name=ossec-hids-server 
-       state=installed
+  apt: name=ossec-hids 
+       state=latest
   notify:
     - Initialize ossec
+  when: ansible_os_family == 'Debian'
 
+### Configure OSSEC server
 - name: Install ossec server private SSL key
   copy: src=ossec.key
         dest=/var/ossec/etc/sslmanager.key
@@ -47,16 +79,24 @@
             dest=/var/ossec/etc/ossec-server.conf
   notify:
     - Restart ossec
+  when: ansible_os_family == 'RedHat'
+
+- name: Set ossec server config
+  template: src=ossec-server.conf.j2 
+            dest=/var/ossec/etc/ossec.conf
+  notify:
+    - Restart ossec
+  when: ansible_os_family == 'Debian'
 
 - name: Copy local rules
   copy: src=local_rules.xml 
         dest=/var/ossec/rules
 
-- name: Set iptables configuration
-  template: src=100_ossec_server.j2
-            dest=/etc/ferm/ferm.d/100_ossec_server 
-            owner=root 
-            group=root
+#- name: Set iptables configuration
+#  template: src=100_ossec_server.j2
+#            dest=/etc/ferm/ferm.d/100_ossec_server 
+#            owner=root 
+#            group=root
 
 - name: Ensure ossec server is running and enabled at start up
   service: name={{ item }}
