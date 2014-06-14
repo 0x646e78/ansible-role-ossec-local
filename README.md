@@ -1,7 +1,7 @@
 ansible-role-ossec-server
 =========================
 
-Ansible for to install and configure an OSSEC IDS Server
+Ansible role to install and configure an OSSEC IDS Server
 
 Credits
 -------
