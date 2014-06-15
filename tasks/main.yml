@@ -1,5 +1,8 @@
 ---
 
+- name: Add OS specific variables
+  include_vars: "{{ ansible_os_family }}".yml
+
 ### RedHat - Add Repo
 - name: Add atomic repository
   template: src=atomic.repo.j2
@@ -8,7 +11,6 @@
             group=root
             mode=0644
   when: ansible_os_family == 'RedHat'
-
 
 # https://www.atomicorp.com/RPM-GPG-KEY.art.txt
 - name: Add atomic GPG key
@@ -37,7 +39,7 @@
 
 ### RedHat - Install ossec server
 - name: Install ossec server
-  yum: name=ossec-hids-server 
+  yum: name={{ pkg_name }}
        state=latest
   notify:
     - Initialize ossec
@@ -53,7 +55,7 @@
 
 ### Debian - Install ossec server
 - name: Install ossec server
-  apt: name=ossec-hids 
+  apt: name={{ pkg_name }}
        state=latest
   notify:
     - Initialize ossec
@@ -99,7 +101,7 @@
 #            group=root
 
 - name: Ensure ossec server is running and enabled at start up
-  service: name={{ item }}
+  service: name={{ service_name }}
            state=started
            enabled=yes
   with_items:
