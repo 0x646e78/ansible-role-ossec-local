@@ -113,7 +113,9 @@
   </remote>
 
   <email_alerts>
-    <email_to>{{ admin_email_address }}</email_to>
+    {% for email in admin_email_addresses %}
+    <email_to>{{ email }}</email_to>
+    {% endfor %}
     <level>7</level>
     <do_not_delay />
     <do_not_group />

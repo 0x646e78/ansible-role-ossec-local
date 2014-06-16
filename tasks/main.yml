@@ -1,7 +1,7 @@
 ---
 
 - name: Include OS specific variables
-  include_vars: "{{ ansible_os_family }}".yml
+  include_vars: "{{ ansible_os_family }}.yml"
 
 ### RedHat - Add Repo
 - name: Add atomic repository
@@ -25,17 +25,17 @@
 - name: Install python-apt, a requirement for apt_repository
   apt:  name=python-apt 
         state=latest
-  when: ansible_of_family == 'Debian'
+  when: ansible_os_family == 'Debian'
 
 - name: Add alienvault GPG key
   apt_key: url='http://ossec.alienvault.com/repos/apt/conf/ossec-key.gpg.key' 
            state=present
-  when: ansible_of_family == 'Debian'
+  when: ansible_os_family == 'Debian'
 
 - name: Add alienvault apt repository
   apt_repository: repo='deb http://ossec.alienvault.com/repos/apt/debian wheezy main' 
                   state=present
-  when: ansible_of_family == 'Debian'
+  when: ansible_os_family == 'Debian'
 
 ### RedHat - Install ossec server
 - name: Install ossec server
