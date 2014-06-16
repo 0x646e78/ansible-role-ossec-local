@@ -1,6 +1,6 @@
 ---
 
-- name: Add OS specific variables
+- name: Include OS specific variables
   include_vars: "{{ ansible_os_family }}".yml
 
 ### RedHat - Add Repo
@@ -70,7 +70,7 @@
         mode=0600
 
 - name: Install ossec server public SSL cert
-  copy: src=ossec.cer
+  copy: src=ossec.cert
         dest=/var/ossec/etc/sslmanager.cert
         owner=root 
         group=root 

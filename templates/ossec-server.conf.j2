@@ -2,18 +2,13 @@
 <ossec_config>
   <global>
     <email_notification>no</email_notification>
-    <email_to>{{ admin_email_address }}</email_to>
+    {% for email in admin_email_addresses %}
+    <email_to>{{ email }}</email_to>
+    {% endfor %}
     <smtp_server>localhost</smtp_server>
-    <email_from>{{ ossec_from_email_address }}@{{ domain }}</email_from>
+    <email_from>ossec@{{ ansible_domain }}</email_from>
     <logall>no</logall>
   </global>
-
-  <syslog_output>
-    <server>{{ log_server_ip }}</server>
-    <port>{{ syslog_tcp_port }}</port>
-    <level>1</level>
-    <format>default</format>
-  </syslog_output>
 
 <rules>
     <include>rules_config.xml</include>
@@ -111,9 +106,6 @@
 
   <global>
     <white_list>127.0.0.1</white_list>
-   {% for subnet in subnets %}
-   <white_list>{{ subnet.address }}/{{ subnet.prefix }}</white_list>
-   {% endfor %}
   </global>
 
   <remote>
@@ -220,12 +212,5 @@
      <log_format>full_command</log_format>
      <command>last -n 5</command>
   </localfile>
-
-{% for item in device_clients %}
-  <localfile>
-     <log_format>syslog</log_format>
-     <location>{{ remote_log_path }}/{{ item }}.log</location>
-   </localfile>
-{% endfor %}
 
 </ossec_config>
