@@ -1,20 +1,18 @@
 
 <ossec_config>
   <global>
-    <email_notification>no</email_notification>
+    <email_notification>yes</email_notification>
     {% for email in admin_email_addresses %}
     <email_to>{{ email }}</email_to>
     {% endfor %}
     <smtp_server>localhost</smtp_server>
-    <email_from>ossec@{{ ansible_domain }}</email_from>
-    <logall>no</logall>
+    <email_from>ossec-alerts@{{ ansible_fqdn }}</email_from>
   </global>
 
 <rules>
     <include>rules_config.xml</include>
     <include>pam_rules.xml</include>
     <include>sshd_rules.xml</include>
-    <include>telnetd_rules.xml</include>
     <include>syslog_rules.xml</include>
     <include>arpwatch_rules.xml</include>
     <include>symantec-av_rules.xml</include>
@@ -25,7 +23,6 @@
     <include>vsftpd_rules.xml</include>
     <include>pure-ftpd_rules.xml</include>
     <include>proftpd_rules.xml</include>
-    <include>ms_ftpd_rules.xml</include>
     <include>ftpd_rules.xml</include>
     <include>hordeimp_rules.xml</include>
     <include>roundcube_rules.xml</include>
@@ -44,7 +41,6 @@
     <include>ids_rules.xml</include>
     <include>squid_rules.xml</include>
     <include>firewall_rules.xml</include>
-    <include>cisco-ios_rules.xml</include>
     <include>netscreenfw_rules.xml</include>
     <include>sonicwall_rules.xml</include>
     <include>postfix_rules.xml</include>
@@ -52,7 +48,6 @@
     <include>imapd_rules.xml</include>
     <include>mailscanner_rules.xml</include>
     <include>dovecot_rules.xml</include>
-    <include>ms-exchange_rules.xml</include>
     <include>racoon_rules.xml</include>
     <include>vpn_concentrator_rules.xml</include>
     <include>spamd_rules.xml</include>
@@ -92,11 +87,16 @@
 
     <!-- Files/directories to ignore -->
     <ignore>/etc/mtab</ignore>
+    <ignore>/etc/mnttab</ignore>
     <ignore>/etc/hosts.deny</ignore>
     <ignore>/etc/mail/statistics</ignore>
     <ignore>/etc/random-seed</ignore>
     <ignore>/etc/adjtime</ignore>
     <ignore>/etc/httpd/logs</ignore>
+    <ignore>/etc/utmpx</ignore>
+    <ignore>/etc/wtmpx</ignore>
+    <ignore>/etc/cups/certs</ignore>
+    <ignore>/etc/svc/volatile</ignore>
   </syscheck>
 
   <rootcheck>
@@ -112,65 +112,21 @@
     <connection>secure</connection>
   </remote>
 
-  <email_alerts>
-    {% for email in admin_email_addresses %}
-    <email_to>{{ email }}</email_to>
-    {% endfor %}
-    <level>7</level>
-    <do_not_delay />
-    <do_not_group />
-  </email_alerts>
+  <alerts>
+    <log_alert_level>1</log_alert_level>
+    <email_alert_level>7</email_alert_level>
+  </alerts>
+
+  <!-- Active Response Config -->
+  <active-response>
+    <disabled>yes</disabled>
+  </active-response>  
 
   <alerts>
     <log_alert_level>1</log_alert_level>
     <email_alert_level>7</email_alert_level>
   </alerts>
 
-  <command>
-    <name>host-deny</name>
-    <executable>host-deny.sh</executable>
-    <expect>srcip</expect>
-    <timeout_allowed>yes</timeout_allowed>
-  </command>  
-
-  <command>
-    <name>firewall-drop</name>
-    <executable>firewall-drop.sh</executable>
-    <expect>srcip</expect>
-    <timeout_allowed>yes</timeout_allowed>
-  </command>  
-
-  <command>
-    <name>disable-account</name>
-    <executable>disable-account.sh</executable>
-    <expect>user</expect>
-    <timeout_allowed>yes</timeout_allowed>
-  </command>  
-
-
-  <!-- Active Response Config -->
-  <active-response>
-    <!-- This response is going to execute the host-deny
-       - command for every event that fires a rule with
-       - level (severity) >= 6.
-       - The IP is going to be blocked for  600 seconds.
-      -->
-    <command>host-deny</command>
-    <location>local</location>
-    <level>6</level>
-    <timeout>600</timeout>
-  </active-response>
-
-  <active-response>
-    <!-- Firewall Drop response. Block the IP for
-       - 600 seconds on the firewall (iptables,
-       - ipfilter, etc).
-      -->
-    <command>firewall-drop</command>
-    <location>local</location>
-    <level>6</level>
-    <timeout>600</timeout>    
-  </active-response>  
 
   <!-- Files to monitor (localfiles) -->
 
@@ -179,27 +135,52 @@
     <location>/var/log/messages</location>
   </localfile>
 
+{% if ansible_os_family == "RedHat" %}
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/secure</location>
+  </localfile>
+{% endif %}
+
+{% if ansible_os_family == "Debian" %}
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/auth.log</location>
+  </localfile>
+{% endif %}
+
+{% if ansible_os_family == "RedHat" %}
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/maillog</location>
+  </localfile>
+{% endif %}
+
+{% if ansible_os_family == "Debian" %}
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/mail.log</location>
+  </localfile>
+{% endif %}
+
+{% if ansible_os_family == "RedHat" %}
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/audit/audit.log</location>
+  </localfile>
+{% endif %}
+
   <localfile>
     <log_format>syslog</log_format>
     <location>/var/log/iptables.log</location>
   </localfile>
 
-  <localfile>
-    <log_format>syslog</log_format>
-    <location>/var/log/secure</location>
-  </localfile>
-
-  <localfile>
-    <log_format>syslog</log_format>
-    <location>/var/log/maillog</location>
-  </localfile>
-
-  <localfile>
-    <log_format>syslog</log_format>
-    <location>/var/log/audit/audit.log</location>
-  </localfile>
-
   <!-- Custom -->
+  <localfile>
+    <log_format>command</log_format>
+    <command>df -h</command>
+  </localfile>
+
   <localfile>
    <log_format>full_command</log_format>
    <command>/sbin/iptables -nL</command>
@@ -211,8 +192,8 @@
   </localfile>
 
   <localfile>
-     <log_format>full_command</log_format>
-     <command>last -n 5</command>
+    <log_format>full_command</log_format>
+    <command>last -n 5</command>
   </localfile>
 
 </ossec_config>
