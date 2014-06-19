@@ -101,9 +101,8 @@
 #            group=root
 
 - name: Ensure ossec server is running and enabled at start up
-  service: name={{ service_name }}
+  service: name={{ item }}
            state=started
            enabled=yes
   with_items:
-    - ossec-hids
-    - ossec-authd
+    - {{ service_name }}
