@@ -105,4 +105,4 @@
            state=started
            enabled=yes
   with_items:
-    - {{ service_name }}
+    - "{{ service_name }}"
