@@ -1,22 +1,15 @@
 ansible-role-ossec-local
 =========================
-
+Fork of unmaintained repo for OSSEC HIDS local install
 Ansible role to install and configure an OSSEC HIDS local install
 
 Use
 ---
 
-You can clone this repo directly into your ansible playbook by issuing
-
 ```
-git clone https://github.com/auraltension/ansible-role-ossec-local.git roles/ossec-server
+git clone https://github.com/johnsiciliano/ansible-role-ossec-local.git roles/ossec-server
 ```
 
-or alternatively as a submodule in much the same way
-
-```
-git submodule add https://github.com/auraltension/ansible-role-ossec-local.git roles/ossec-local
-```
 
 You will need to set up variables for _admin_email_addresses_.  I choose to put these in group_vars, such as
 
