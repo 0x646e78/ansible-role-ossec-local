@@ -11,14 +11,12 @@
             group=root
             mode=0644
   when: ansible_os_family == 'RedHat'
-
-# https://www.atomicorp.com/RPM-GPG-KEY.art.txt
+  
 - name: Add atomic GPG key
-  copy: src=RPM-GPG-KEY.art.txt  
-        dest=/etc/pki/rpm-gpg/RPM-GPG-KEY.art.txt 
-        owner=root 
-        group=root 
-        mode=0644
+  rpm_key: 
+      key: https://www.atomicorp.com/RPM-GPG-KEY.art.txt
+      state: present
+  when: ansible_os_family == 'RedHat'
   when: ansible_os_family == 'RedHat'
 
 ### Debian - Add Repo
