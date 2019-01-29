@@ -1,0 +1,19 @@
+pipeline:
+steps:
+- name: build
+  image: alpine
+  environment:
+    USERNAME:
+      from_secret: username
+  commands:
+  - echo "hi there"
+  - echo ${USERNAME}
+
+secrets:
+  docker_username:
+    external:
+      name: secret/docker#username
+
+  docker_password:
+    external:
+      name: secret/docker#password
