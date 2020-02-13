@@ -1,11 +1,12 @@
 kind: pipeline
 name: default
+
+clone:
+  disable: true
+
 steps:
-- name: build
-  image: alpine
-  environment:
-    USERNAME:
-      from_secret: username
+- name: test_drone
+  image: alpine:3.9
   commands:
-  - echo "hi there"
-  - echo ${USERNAME}
+  - echo "show hello world by drone"
+  - echo $(pwd)
