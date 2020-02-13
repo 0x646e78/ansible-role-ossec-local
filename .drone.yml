@@ -1,4 +1,5 @@
-pipeline:
+kind: pipeline
+name: default
 steps:
 - name: build
   image: alpine
@@ -8,12 +9,3 @@ steps:
   commands:
   - echo "hi there"
   - echo ${USERNAME}
-
-secrets:
-  docker_username:
-    external:
-      name: secret/docker#username
-
-  docker_password:
-    external:
-      name: secret/docker#password
